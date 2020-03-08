@@ -17,18 +17,6 @@ public:
     udmabuf& operator=(udmabuf&& other);
     void operator=(const udmabuf&) = delete;
 
-    std::ifstream get_prop(std::string_view name) const
-    {
-        std::string path = (m_class_path + "/").append(name);
-        return std::ifstream(path);
-    }
-
-    std::ofstream set_prop(std::string_view name) const
-    {
-        std::string path = (m_class_path + "/").append(name);
-        return std::ofstream(path);
-    }
-
     void sync_for_cpu(unsigned long offset, unsigned long length) const noexcept;
 
     const void *get() const noexcept;
@@ -36,6 +24,7 @@ public:
     size_t size() const noexcept;
     size_t phys_addr() const noexcept;
     const std::string &name() const noexcept;
+    const std::string &dev_name() const noexcept;
 
 private:
     void map(int o_sync);
@@ -45,9 +34,12 @@ private:
     int m_fd = -1;
     std::string m_name;
     std::string m_dev_name;
-    std::string m_class_path;
     size_t      m_phys_addr = 0;
     size_t      m_size = 0;
     void*       m_ptr = nullptr;
 };
 
+static_assert(std::is_copy_assignable_v<udmabuf> == false);
+static_assert(std::is_copy_constructible_v<udmabuf> == false);
+static_assert(std::is_move_assignable_v<udmabuf> == true);
+static_assert(std::is_move_constructible_v<udmabuf> == true);

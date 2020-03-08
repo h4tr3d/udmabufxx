@@ -16,26 +16,52 @@
 
 namespace {
 
-const char* dev_prefix = "/dev/";
-const char* sys_prefix = "/sys/class/u-dma-buf/";
+const char* dev_prefix = "{}/dev/{}";
+
+#define SYS_PREFIX "{}/sys/class/u-dma-buf/{}/"
+
+const char* param_phys_addr    = SYS_PREFIX "phys_addr";
+const char* param_size         = SYS_PREFIX "size";
+//const char* param_sync_mode    = SYS_PREFIX "sync_mode";
+//const char* param_debug_vma    = SYS_PREFIX "debug_vma";
+const char* param_sync_for_cpu = SYS_PREFIX "sync_for_cpu";
+
+const char* moc_sysroot = "";
 
 }
 
+namespace {
+std::ifstream get_prop(std::string_view prop, std::string_view dma_name)
+{
+    return std::ifstream(fmt::format(prop, moc_sysroot, dma_name));
+}
+
+[[maybe_unused]]
+std::ofstream set_prop(std::string_view prop, std::string_view dma_name)
+{
+    return std::ofstream(fmt::format(prop, moc_sysroot, dma_name));
+}
+}
+
 #ifdef TESTS_MOC
+void moc_set_sysroot(const char* sysroot) noexcept
+{
+    moc_sysroot = sysroot;
+}
+const char* moc_get_sysroot() noexcept
+{
+    return moc_sysroot;
+}
 #endif
 
 udmabuf::udmabuf() = default;
 
 udmabuf::udmabuf(std::string_view name, bool sync)
     : m_name(name),
-      m_dev_name(dev_prefix),
-      m_class_path(sys_prefix)
+      m_dev_name(fmt::format(dev_prefix, moc_sysroot, name))
 {
-    m_dev_name.append(name);
-    m_class_path.append(name);
-
-    get_prop("phys_addr") >> std::hex >> m_phys_addr;
-    get_prop("size") >> std::dec >> m_size;
+    get_prop(param_phys_addr, m_name) >> std::hex >> m_phys_addr;
+    get_prop(param_size, m_name) >> std::dec >> m_size;
 
     std::cout << fmt::format("addr: 0x{0:0{1}X}, size: {2}", m_phys_addr, sizeof(m_phys_addr)*2, m_size) << '\n';
 
@@ -69,7 +95,7 @@ void udmabuf::sync_for_cpu(unsigned long offset, unsigned long length) const noe
     const unsigned long  sync_size = length;
     unsigned int   sync_direction = 1;
     unsigned long  sync_for_cpu   = 1;
-    auto path = m_class_path + "/sync_for_cpu";
+    auto path = fmt::format(param_sync_for_cpu, moc_sysroot, m_name);
     if (int fd; (fd  = ::open(path.c_str(), O_WRONLY)) != -1) {
         ::snprintf(attr, sizeof(attr),
                    "0x%08X%08X",
@@ -98,6 +124,11 @@ size_t udmabuf::size() const noexcept
 const std::string& udmabuf::name() const noexcept
 {
     return m_name;
+}
+
+const std::string &udmabuf::dev_name() const noexcept
+{
+    return m_dev_name;
 }
 
 size_t udmabuf::phys_addr() const noexcept
@@ -136,7 +167,6 @@ void udmabuf::swap(udmabuf &other)
     std::swap(m_fd, other.m_fd);
     std::swap(m_name, other.m_name);
     std::swap(m_dev_name, other.m_dev_name);
-    std::swap(m_class_path, other.m_class_path);
     std::swap(m_phys_addr, other.m_phys_addr);
     std::swap(m_size, other.m_size);
     std::swap(m_ptr, other.m_ptr);
