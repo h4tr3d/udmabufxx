@@ -67,8 +67,11 @@ struct context
         }
         {
             ofstream ofs(sysprefix / "sync_for_cpu", ios_base::out|ios_base::binary);
-            //ofs << fmt::format("0x{:x}", 0xDEADBEEF);
         }
+        {
+            ofstream ofs(sysprefix / "sync_for_device", ios_base::out|ios_base::binary);
+        }
+
     }
 
     ~context()

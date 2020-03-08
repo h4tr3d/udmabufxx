@@ -20,11 +20,12 @@ const char* dev_prefix = "{}/dev/{}";
 
 #define SYS_PREFIX "{}/sys/class/u-dma-buf/{}/"
 
-const char* param_phys_addr    = SYS_PREFIX "phys_addr";
-const char* param_size         = SYS_PREFIX "size";
-//const char* param_sync_mode    = SYS_PREFIX "sync_mode";
-//const char* param_debug_vma    = SYS_PREFIX "debug_vma";
-const char* param_sync_for_cpu = SYS_PREFIX "sync_for_cpu";
+const char* param_phys_addr       = SYS_PREFIX "phys_addr";
+const char* param_size            = SYS_PREFIX "size";
+//const char* param_sync_mode     = SYS_PREFIX "sync_mode";
+//const char* param_debug_vma     = SYS_PREFIX "debug_vma";
+const char* param_sync_for_cpu    = SYS_PREFIX "sync_for_cpu";
+const char* param_sync_for_device = SYS_PREFIX "sync_for_device";
 
 const char* moc_sysroot = "";
 
@@ -91,16 +92,34 @@ udmabuf &udmabuf::operator=(udmabuf &&other)
 void udmabuf::sync_for_cpu(unsigned long offset, unsigned long length) const noexcept
 {
     char attr[64];
-    const unsigned long  sync_offset = offset;
-    const unsigned long  sync_size = length;
-    unsigned int   sync_direction = 1;
-    unsigned long  sync_for_cpu   = 1;
+    const unsigned long  sync_offset    = offset;
+    const unsigned long  sync_size      = length;
+    const unsigned int   sync_direction = 1;
+    const unsigned long  sync_for_cpu   = 1;
     auto path = fmt::format(param_sync_for_cpu, moc_sysroot, m_name);
     if (int fd; (fd  = ::open(path.c_str(), O_WRONLY)) != -1) {
         ::snprintf(attr, sizeof(attr),
                    "0x%08X%08X",
                    (uint32_t(sync_offset) & 0xFFFFFFFF),
                    (uint32_t(sync_size) & 0xFFFFFFF0) | (uint32_t(sync_direction) << 2) | uint32_t(sync_for_cpu));
+        ::write(fd, attr, strlen(attr));
+        ::close(fd);
+    }
+}
+
+void udmabuf::sync_for_device(unsigned long offset, unsigned long length) const noexcept
+{
+    char attr[64];
+    const unsigned long  sync_offset     = offset;
+    const unsigned long  sync_size       = length;
+    const unsigned int   sync_direction  = 1;
+    const unsigned long  sync_for_device = 1;
+    auto path = fmt::format(param_sync_for_device, moc_sysroot, m_name);
+    if (int fd; (fd  = open(path.c_str(), O_WRONLY)) != -1) {
+        ::snprintf(attr, sizeof(attr),
+                   "0x%08X%08X",
+                   (uint32_t(sync_offset) & 0xFFFFFFFF),
+                   (uint32_t(sync_size) & 0xFFFFFFF0) | (uint32_t(sync_direction) << 2) | uint32_t(sync_for_device));
         ::write(fd, attr, strlen(attr));
         ::close(fd);
     }

@@ -18,6 +18,7 @@ public:
     void operator=(const udmabuf&) = delete;
 
     void sync_for_cpu(unsigned long offset, unsigned long length) const noexcept;
+    void sync_for_device(unsigned long offset, unsigned long length) const noexcept;
 
     const void *get() const noexcept;
     void* get() noexcept;

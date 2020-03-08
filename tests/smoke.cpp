@@ -138,3 +138,40 @@ TEST_CASE("Sync for CPU", "[smoke]")
     }
 }
 
+TEST_CASE("Sync for Device", "[smoke]")
+{
+    udmabuf buf{BUF_NAME};
+    constexpr static uint32_t sync_direction = 1;
+    constexpr static uint32_t sync_for_cpu   = 1;
+
+    struct cases_t {
+        size_t offset;
+        size_t size;
+    } cases[] = {
+        {0, buf.size()},
+        {1, buf.size() - 1},
+        {4096, 4096}
+    };
+
+    // just assumption for tests
+    static_assert (BUF_SIZE > 2*4096);
+
+    auto sysroot = moc_get_sysroot();
+    fs::path class_path = fs::path(sysroot) / "sys/class/u-dma-buf" / BUF_NAME;
+
+    for (auto const& v : cases) {
+        buf.sync_for_device(v.offset, v.size);
+
+        std::clog << "sync: " << v.offset << " / " << v.size << '\n';
+
+        std::ifstream ifs(class_path / "sync_for_device", std::ios_base::out|std::ios_base::binary);
+        std::string value;
+        std::string expected = fmt::format("0x{:08X}{:08X}",
+                                           v.offset,
+                                           (uint32_t(v.size) & 0xFFFFFFF0) | sync_direction<<2 | sync_for_cpu<<0);
+
+        ifs >> value;
+
+        REQUIRE(value == expected);
+    }
+}
