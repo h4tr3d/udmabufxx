@@ -1,0 +1,12 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/@LIB_INSTALL_DIR@
+includedir=${prefix}/@INC_INSTALL_DIR@
+
+Name: udmabufxx
+Description: C++ interface to work with U-DMA-BUF kernel interface
+Version: 0.1
+Conflicts:
+Libs: -L${libdir}  -ludmabuf
+Libs.private: @PRIVATE_LIBS@
+Cflags: -I${includedir}
