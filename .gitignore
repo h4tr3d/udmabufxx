@@ -17,6 +17,7 @@
 *.qm
 .#*
 *.*#
+.cmake/
 core
 !core/
 tags
