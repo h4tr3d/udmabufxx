@@ -1,7 +1,7 @@
 
 
-add_library(Udmabufxx::Udmabufxx INTERFACE IMPORTED)
-set_target_properties(Udmabufxx::Udmabufxx PROPERTIES
+add_library(udmabufxx::udmabufxx INTERFACE IMPORTED)
+set_target_properties(udmabufxx::udmabufxx PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "@CMAKE_INSTALL_PREFIX@/@INC_INSTALL_DIR@"
     INTERFACE_LINK_LIBRARIES "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@")
 

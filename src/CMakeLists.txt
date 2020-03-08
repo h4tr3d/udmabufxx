@@ -1,23 +1,42 @@
 set(${PROJECT_NAME}_DEFS "")
-if (REAL_PAGE_ALLOCATION_WA)
-    list(APPEND ${PROJECT_NAME}_DEFS REAL_PAGE_ALLOCATION_WA=1)
+if (UDMABUFXX_REAL_PAGE_ALLOCATION_WA)
+    list (APPEND ${PROJECT_NAME}_DEFS REAL_PAGE_ALLOCATION_WA=1)
+endif()
+
+if (UDMABUFXX_ENABLE_MOC)
+    list (APPEND ${PROJECT_NAME}_DEFS TESTS_MOC=1)
+    set (MOC_SUFFIX "_moc")
+    set (ENABLE_STATIC Off)
+    message(STATUS "MOC is enabled")
 endif()
 
 set(SRC_LIST
     udmabuf.h
     udmabuf.cpp)
 
-add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
-target_link_libraries(${PROJECT_NAME} Threads::Threads)
-target_compile_definitions(${PROJECT_NAME} PUBLIC ${${PROJECT_NAME}_DEFS})
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+set(NAMESPACE_NAME ${PROJECT_NAME})
+set(TARGET_NAME ${PROJECT_NAME}${MOC_SUFFIX})
+
+message(STATUS "${NAMESPACE_NAME} ${TARGET_NAME}")
+
+add_library(${TARGET_NAME} SHARED ${SRC_LIST})
+target_link_libraries(${TARGET_NAME} Threads::Threads fmt::fmt-header-only)
+target_compile_definitions(${TARGET_NAME} PUBLIC ${${PROJECT_NAME}_DEFS})
+set_target_properties(${TARGET_NAME} PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}")
+add_library(${NAMESPACE_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 
 if (ENABLE_STATIC)
     add_library(${PROJECT_NAME}_static STATIC ${SRC_LIST})
     set_target_properties(${PROJECT_NAME}_static PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-    target_link_libraries(${PROJECT_NAME}_static Threads::Threads)
+    target_link_libraries(${PROJECT_NAME}_static Threads::Threads fmt::fmt-header-only)
     target_compile_definitions(${PROJECT_NAME}_static PRIVATE ${${PROJECT_NAME}_DEFS$})
     add_library(${PROJECT_NAME}::${PROJECT_NAME}_static ALIAS ${PROJECT_NAME}_static)
+endif()
+
+# skip installation for mocked version
+if (UDMABUFXX_ENABLE_MOC)
+    return()
 endif()
 
 #

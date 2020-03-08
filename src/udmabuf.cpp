@@ -21,6 +21,9 @@ const char* sys_prefix = "/sys/class/u-dma-buf/";
 
 }
 
+#ifdef TESTS_MOC
+#endif
+
 udmabuf::udmabuf() = default;
 
 udmabuf::udmabuf(std::string_view name, bool sync)

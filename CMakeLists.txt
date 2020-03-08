@@ -10,8 +10,9 @@ project(udmabufxx)
 set(LIB_INSTALL_DIR lib        CACHE STRING  "Install location of libraries")
 set(BIN_INSTALL_DIR bin        CACHE STRING  "Install location of executables")
 set(INC_INSTALL_DIR include    CACHE STRING  "Intall location of headers")
-set(ENABLE_STATIC   Off        CACHE BOOL    "Enable static library")
-set(REAL_PAGE_ALLOCATION_WA On CACHE BOOL    "WA for issue #38 of udmabuf")
+set(UDMABUFXX_ENABLE_STATIC           Off  CACHE BOOL    "Enable static library")
+set(UDMABUFXX_REAL_PAGE_ALLOCATION_WA On   CACHE BOOL    "WA for issue #38 of udmabuf")
+set(UDMABUFXX_ENABLE_MOC              Off  CACHE BOOL    "Enable mocking")
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
@@ -30,6 +31,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 find_package(Threads REQUIRED)
 find_package(PkgConfig)
+find_package(fmt REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # Update if necessary
