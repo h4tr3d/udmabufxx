@@ -8,7 +8,7 @@ class udmabuf
 {
 public:
     udmabuf();
-    explicit udmabuf(std::string_view name);
+    explicit udmabuf(std::string_view name, bool sync = false);
 
     ~udmabuf() noexcept;
 
@@ -38,7 +38,7 @@ public:
     const std::string &name() const noexcept;
 
 private:
-    void map();
+    void map(int o_sync);
     void swap(udmabuf& other);
 
 private:

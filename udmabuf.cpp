@@ -23,7 +23,7 @@ const char* sys_prefix = "/sys/class/u-dma-buf/";
 
 udmabuf::udmabuf() = default;
 
-udmabuf::udmabuf(std::string_view name)
+udmabuf::udmabuf(std::string_view name, bool sync)
     : m_name(name),
       m_dev_name(dev_prefix),
       m_class_path(sys_prefix)
@@ -36,7 +36,7 @@ udmabuf::udmabuf(std::string_view name)
 
     std::cout << fmt::format("addr: 0x{0:0{1}X}, size: {2}", m_phys_addr, sizeof(m_phys_addr)*2, m_size) << '\n';
 
-    map();
+    map(sync ? O_SYNC : 0);
 }
 
 udmabuf::~udmabuf() noexcept
@@ -102,10 +102,9 @@ size_t udmabuf::phys_addr() const noexcept
     return m_phys_addr;
 }
 
-void udmabuf::map()
+void udmabuf::map(int o_sync)
 {
-    // TBD: optional O_SYNC
-    if (int fd; (fd = open(m_dev_name.c_str(), O_RDWR)) != -1) {
+    if (int fd; (fd = open(m_dev_name.c_str(), O_RDWR | o_sync)) != -1) {
         m_ptr = mmap(nullptr, m_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
         m_fd = fd;
         if (m_ptr == MAP_FAILED) {
