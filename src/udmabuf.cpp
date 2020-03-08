@@ -26,6 +26,7 @@ const char* param_size            = SYS_PREFIX "size";
 //const char* param_debug_vma     = SYS_PREFIX "debug_vma";
 const char* param_sync_for_cpu    = SYS_PREFIX "sync_for_cpu";
 const char* param_sync_for_device = SYS_PREFIX "sync_for_device";
+const char* param_dma_coherent    = SYS_PREFIX "dma_coherent";
 
 const char* moc_sysroot = "";
 
@@ -123,6 +124,13 @@ void udmabuf::sync_for_device(unsigned long offset, unsigned long length) const 
         ::write(fd, attr, strlen(attr));
         ::close(fd);
     }
+}
+
+bool udmabuf::is_dma_coherent() const noexcept
+{
+    bool value;
+    get_prop(param_dma_coherent, m_name) >> std::hex >> value;
+    return value;
 }
 
 const void *udmabuf::get() const noexcept

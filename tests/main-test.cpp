@@ -71,7 +71,10 @@ struct context
         {
             ofstream ofs(sysprefix / "sync_for_device", ios_base::out|ios_base::binary);
         }
-
+        {
+            ofstream ofs(sysprefix / "dma_coherent", ios_base::out|ios_base::binary);
+            ofs << "1";
+        }
     }
 
     ~context()

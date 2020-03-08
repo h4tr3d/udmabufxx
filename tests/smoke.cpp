@@ -175,3 +175,10 @@ TEST_CASE("Sync for Device", "[smoke]")
         REQUIRE(value == expected);
     }
 }
+
+TEST_CASE("DMA Coherent check", "[smoke]")
+{
+    udmabuf buf{BUF_NAME};
+    REQUIRE(buf.is_dma_coherent());
+}
+
