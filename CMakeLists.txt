@@ -50,4 +50,16 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     endif()
 endif()
 
+# sources
 add_subdirectory(src)
+
+# testing
+set(CATCH_DIR ${CMAKE_CURRENT_LIST_DIR}/externals/catch2)
+if (EXISTS ${CATCH_DIR}/CMakeLists.txt)
+    enable_testing()
+    set(CATCH_BUILD_TESTING Off CACHE STRING "")
+    add_subdirectory(${CATCH_DIR})
+    add_subdirectory(tests)
+else()
+    message(STATUS "Catch2 not found, testing skipped")
+endif()
