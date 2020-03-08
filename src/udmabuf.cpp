@@ -186,6 +186,8 @@ void udmabuf::map(int o_sync)
             }
         }
 #endif
+    } else {
+        throw std::system_error({errno, std::system_category()}, "Can't open UDMABUF device");
     }
 }
 

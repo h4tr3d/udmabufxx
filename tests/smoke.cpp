@@ -32,6 +32,11 @@ TEST_CASE("Empty creation", "[smoke]")
     REQUIRE(buf.size() == 0);
 }
 
+TEST_CASE("Create wrong device", "[smoke]")
+{
+    REQUIRE_THROWS(udmabuf{"udmabuf-wrong"});
+}
+
 TEST_CASE("Copy & Move", "[smoke]")
 {
     REQUIRE(std::is_copy_assignable_v<udmabuf> == false);
