@@ -19,6 +19,7 @@
 *.*#
 .cmake/
 core
+build
 !core/
 tags
 .DS_Store
