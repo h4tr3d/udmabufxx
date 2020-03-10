@@ -33,24 +33,12 @@ find_package(Threads REQUIRED)
 find_package(PkgConfig)
 find_package(fmt REQUIRED)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # Update if necessary
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # Update if necessary
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  # using Intel C++
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    # Force to always compile with W4
-    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-      string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else()
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-    endif()
-endif()
+# Warnings
+set (UDMABUFXX_WARNING_OPTIONS
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+       -Wall -Wextra>
+     $<$<CXX_COMPILER_ID:MSVC>:
+       /W4>)
 
 # sources
 add_subdirectory(src)
