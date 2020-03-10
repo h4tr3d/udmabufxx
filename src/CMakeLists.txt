@@ -19,28 +19,41 @@ set(TARGET_NAME ${PROJECT_NAME}${MOC_SUFFIX})
 
 message(STATUS "${NAMESPACE_NAME} ${TARGET_NAME}")
 
-add_library(${TARGET_NAME} SHARED ${SRC_LIST})
-target_compile_options(${TARGET_NAME} PRIVATE ${UDMABUFXX_WARNING_OPTIONS})
-target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads fmt::fmt-header-only)
-target_compile_definitions(${TARGET_NAME} PRIVATE ${${PROJECT_NAME}_DEFS})
-target_include_directories(${TARGET_NAME}
-    PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:include>
-    PRIVATE
-      ${CMAKE_CURRENT_SOURCE_DIR})
-set_target_properties(${TARGET_NAME}
-    PROPERTIES
-      PUBLIC_HEADER udmabuf.h)
-add_library(${NAMESPACE_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
-
+set(UDMABUFXX_TARGETS ${TARGET_NAME})
 if (UDMABUFXX_ENABLE_STATIC)
-    add_library(${TARGET_NAME}_static STATIC ${SRC_LIST})
-    target_compile_options(${TARGET_NAME}_static PRIVATE ${UDMABUFXX_WARNING_OPTIONS})
-    set_target_properties(${TARGET_NAME}_static PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-    target_link_libraries(${TARGET_NAME}_static PRIVATE Threads::Threads fmt::fmt-header-only)
-    target_compile_definitions(${TARGET_NAME}_static PRIVATE ${${PROJECT_NAME}_DEFS$})
-    add_library(${NAMESPACE_NAME}::${TARGET_NAME}_static ALIAS ${PROJECT_NAME}_static)
+    list(APPEND UDMABUFXX_TARGETS ${PROJECT_NAME}-static)
+endif()
+
+# Common part for all library targets
+foreach(TARGET ${UDMABUFXX_TARGETS})
+    set(TYPE SHARED)
+    if (${TARGET} MATCHES "-static$")
+        set(TYPE STATIC)
+    endif()
+
+    add_library(${TARGET} ${TYPE} ${SRC_LIST})
+    target_compile_options(${TARGET} PRIVATE ${UDMABUFXX_WARNING_OPTIONS})
+    target_link_libraries(${TARGET} PRIVATE Threads::Threads fmt::fmt-header-only)
+    target_compile_definitions(${TARGET} PRIVATE ${${PROJECT_NAME}_DEFS})
+    target_include_directories(${TARGET}
+        PUBLIC
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+          $<INSTALL_INTERFACE:include>
+        PRIVATE
+          ${CMAKE_CURRENT_SOURCE_DIR})
+    add_library(${NAMESPACE_NAME}::${TARGET} ALIAS ${TARGET})
+endforeach()
+
+# Target-specific
+# Shared:
+if (TARGET ${TARGET_NAME})
+    set_target_properties(${TARGET_NAME}
+        PROPERTIES
+          PUBLIC_HEADER udmabuf.h)
+endif()
+# Static
+if (TARGET ${TARGET_NAME}-static)
+    set_target_properties(${TARGET_NAME}-static PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 endif()
 
 # skip installation for mocked version
@@ -53,39 +66,34 @@ endif()
 #
 if (UDMABUFXX_NOT_SUBPROJECT)
 
-    set(INSTALL_TARGETS ${PROJECT_NAME})
-    if (UDMABUFXX_ENABLE_STATIC)
-        list(APPEND INSTALL_TARGETS ${PROJECT_NAME}_static)
-    endif()
-
-    install(TARGETS ${INSTALL_TARGETS} EXPORT UdmabufxxTargets
+    install(TARGETS ${UDMABUFXX_TARGETS} EXPORT UdmabufxxTargets
         LIBRARY  DESTINATION ${LIB_INSTALL_DIR}
         ARCHIVE  DESTINATION ${LIB_INSTALL_DIR}
         RUNTIME  DESTINATION ${BIN_INSTALL_DIR}
         INCLUDES DESTINATION include)
 
     install(EXPORT UdmabufxxTargets
-        FILE UdmabufxxTargets.cmake
-        NAMESPACE Udmabufxx::
-        DESTINATION lib/cmake/Udmabufxx)
+        FILE udmabufxx-targets.cmake
+        NAMESPACE udmabufxx::
+        DESTINATION lib/cmake/udmabufxx)
 
     include(CMakePackageConfigHelpers)
     configure_package_config_file(
       "Config.cmake.in"
-      "UdmabufxxConfig.cmake"
-      INSTALL_DESTINATION ${LIB_INSTALL_DIR}/cmake/Udmabufxx
+      "udmabufxx-config.cmake"
+      INSTALL_DESTINATION ${LIB_INSTALL_DIR}/cmake/udmabufxx
 #      PATH_VARS
 #        CMAKE_INSTALL_LIBDIR
       )
-    write_basic_package_version_file("UdmabufxxConfigVersion.cmake"
+    write_basic_package_version_file("udmabufxx-config-version.cmake"
         VERSION 0.1
         COMPATIBILITY SameMajorVersion)
     install(
         FILES
-          "${CMAKE_CURRENT_BINARY_DIR}/UdmabufxxConfig.cmake"
-          "${CMAKE_CURRENT_BINARY_DIR}/UdmabufxxConfigVersion.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/udmabufxx-config.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/udmabufxx-config-version.cmake"
         DESTINATION
-          "${CMAKE_INSTALL_LIBDIR}/cmake/Udmabufxx"
+          "${CMAKE_INSTALL_LIBDIR}/cmake/udmabufxx"
       )
 
     if (PKG_CONFIG_FOUND)
