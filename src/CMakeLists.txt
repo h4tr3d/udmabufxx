@@ -93,7 +93,7 @@ if (UDMABUFXX_NOT_SUBPROJECT)
           "${CMAKE_CURRENT_BINARY_DIR}/udmabufxx-config.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/udmabufxx-config-version.cmake"
         DESTINATION
-          "${CMAKE_INSTALL_LIBDIR}/cmake/udmabufxx"
+          "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/cmake/udmabufxx"
       )
 
     if (PKG_CONFIG_FOUND)
