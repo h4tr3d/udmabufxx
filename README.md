@@ -9,14 +9,14 @@ C++ interface for [udmabuf](https://github.com/ikwzm/udmabuf) kernel module.
 mkdir build
 cd build
 cmake ..
-cmake --build
-ctest -v
+cmake --build .
+ctest -V
 ```
 
 ## Link to project
 
-1. CMake-based project: as git submodule and connect via `add_subdirectory()`. Link with `udmabufxx::udmabuxx` or with `udmabufxx::udmabuxx_static`
-2. CMake-based project (**untested**): system-wide installation via `find_package(Udmabufxx)`. Linkx with `udmabufxx::udmabufxx`.
+1. CMake-based project: as git submodule and connect via `add_subdirectory()`. Link with `udmabufxx::udmabuxx` or `udmabufxx::udmabufxx-static`
+2. CMake-based project: system-wide installation via `find_package(udmabufxx)`. Link with `udmabufxx::udmabufxx` or `udmabufxx::udmabufxx-static`.
 3. Generic project: via `pkg-config --cflags --libs udmabufxx`
 
 ## Usage
