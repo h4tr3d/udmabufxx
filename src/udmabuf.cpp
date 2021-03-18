@@ -169,6 +169,8 @@ void udmabuf::map(int o_sync)
         m_ptr = mmap(nullptr, m_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
         m_fd = fd;
         if (m_ptr == MAP_FAILED) {
+            ::close(fd);
+            m_fd = -1;
             std::error_code ec{errno, std::system_category()};
             throw std::system_error(ec, fmt::format("Can't map CMA memory"));
         }
